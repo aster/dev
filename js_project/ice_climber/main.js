@@ -5,11 +5,11 @@ let iceMan = {
     'height': 20,
     'width': 20,
     'color': 'white',
-    'stroke': "rgba(0, 0, 255, 0.8)",
+    'stroke': "rgba(0, 0, 255, 0.5)",
     'x': canvas.width / 2 - 20 / 2, //20 -> iceMan.width
     'y': canvas.height - 150,
 
-    'jumpV': 20,
+    'jumpV': 25,
     'jumpAc': 0.8,
     'jumpFlag': false,
 
@@ -26,11 +26,82 @@ let dy = 2;
 const dyMax = 10;
 const ac = 1.25;
 
+let needle = {
+    'width': 10,
+    'height': 20,
+    'count': 50,
+    'margin': 1,
+}
+
+let scaffolds = {
+    'x': 0,
+    'y': canvas.height - 80,
+    'height': 10,
+    'interval': canvas.height / 4,
+    'holeWidth': canvas.width / 5,
+    'holeNum': 1,
+    'holeX': 0,
+    'entity': [],
+
+}
+
 let rightPressed = false;
 let leftPressed = false;
 
 const insideRightWall = () => iceMan.x < canvas.width - iceMan.width;
 const insideLeftWall = () => iceMan.x > 0;
+
+const startTime = Date.now();
+let score = 0;
+let lives = '♥♥♥';
+
+function initScaffolds() {
+    for (let c = 0; c < 3; c++) {
+        scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1));
+        for (let r = 0; r < 1; r++) {
+            let btmX1 = scaffolds.holeX - scaffolds.holeWidth / 2;
+            let btmX2 = btmX1 + scaffolds.holeWidth;
+            let btmY = scaffolds.y - c * scaffolds.interval;
+            //-------+        +-------------
+            //       |        |
+            //------btmX1    btmX2--------------
+            //     btmY
+
+            scaffolds.entity.push([btmX1, btmX2, btmY]);
+        }
+    }
+}
+
+function drawScaffolds() {
+    for (let c = 0; c < 3; c++) {
+        let topY = scaffolds.entity[c][2] + scaffolds.height;
+        for (let n = 0; n < 1; n++) {
+            ctx.beginPath();
+            ctx.rect(0, topY, scaffolds.entity[c][0], scaffolds.height);
+            ctx.rect(scaffolds.entity[c][1], topY, canvas.width - scaffolds.entity[c][1], scaffolds.height);
+            ctx.fillStyle = 'gray';
+            ctx.strokeStyle = 'black';
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+
+        }
+    }
+}
+
+function drawNeedles() {
+    for (let r = 0; r < needle.count; r++) {
+        ctx.beginPath();
+        ctx.moveTo(r * needle.width + 1, canvas.height);
+        ctx.lineTo(r * needle.width + needle.width / 2, canvas.height - needle.height);
+        ctx.lineTo(r * needle.width + needle.width - 1, canvas.height);
+        ctx.closePath();
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+        ctx.fillStyle = 'gray';
+        ctx.fill();
+    }
+}
 
 function drawIceMan() {
     ctx.beginPath();
@@ -101,9 +172,19 @@ function checkMaxAcceleration() {
     } else return dy;
 }
 
+function getNowTime() {
+    return Date.now() - startTime;
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawIceMan();
+    drawNeedles();
+    drawScaffolds();
+    drawLives();
+    drawScore();
+
+    score = Math.ceil(getNowTime() / 1000);
 
 
     checkOnField();
@@ -112,7 +193,7 @@ function draw() {
     xAxisMove();
     checkSlide();
     checkJump();
-    console.log('dy = ', dy, '  jump flag : ', iceMan.jumpFlag);
+
 
     //-----------------------
     iceMan.x += dx;
@@ -147,5 +228,19 @@ function KeyUpHandler(e) {
     }
 }
 
+function drawScore() {
+    ctx.font = "16px Comic Sans MS";
+    ctx.fillStyle = "magenta";
+    ctx.fillText("SCORE: " + score, 8, 20);
 
+}
+
+function drawLives() {
+    ctx.font = "16px Comic Sans MS";
+    ctx.fillStyle = "magenta";
+    ctx.fillText("LIVES: " + lives, 8, 45);
+}
+
+initScaffolds();
+console.log(scaffolds.entity[1]);
 draw();
