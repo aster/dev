@@ -8,22 +8,29 @@ let iceMan = {
     'stroke': "rgba(0, 0, 255, 0.8)",
     'x': canvas.width / 2 - 20 / 2, //20 -> iceMan.width
     'y': canvas.height - 150,
-    'dropV': 2,
-    'xV': 3,
+
+    'jumpV': 20,
+    'jumpAc': 0.8,
+    'jumpFlag': false,
+
+    'xV': 2,
     'slideV': 0,
     'slideVMax': 3,
     'slideAc': 0.9,
-    'leftSlideFlag': false,
     'rightSlideFlag': false,
+    'leftSlideFlag': false,
 }
 
 let dx = 0;
 let dy = 2;
 const dyMax = 10;
-const ac = 1.08;
+const ac = 1.25;
 
 let rightPressed = false;
 let leftPressed = false;
+
+const insideRightWall = () => iceMan.x < canvas.width - iceMan.width;
+const insideLeftWall = () => iceMan.x > 0;
 
 function drawIceMan() {
     ctx.beginPath();
@@ -35,35 +42,40 @@ function drawIceMan() {
     ctx.closePath();
 }
 
-
 function xAxisMove() {
-    if (rightPressed && iceMan.x < canvas.width - iceMan.width) {
+    if (rightPressed && insideRightWall()) {
         iceMan.x += iceMan.xV;
-    } else if (leftPressed && iceMan.x > 0) {
+    } else if (leftPressed && insideLeftWall()) {
         iceMan.x -= iceMan.xV;
     }
 }
 
 function checkSlide() {
-    if (iceMan.leftSlideFlag) {
-        iceMan.slideV = -iceMan.slideVMax;
-        iceMan.leftSlideFlag = false;
-
-    } else if (iceMan.rightSlideFlag) {
+    if (iceMan.rightSlideFlag && insideRightWall()) {
         iceMan.slideV = iceMan.slideVMax;
-        iceMan.rightSlideFlag = false;
+    } else if (iceMan.leftSlideFlag && insideLeftWall()) {
+        iceMan.slideV = -iceMan.slideVMax;
     }
 
     //slide
-    if (Math.abs(iceMan.slideV) > 0.0001) {
+    if (Math.abs(iceMan.slideV) > 0.0001 && insideRightWall() && insideLeftWall()) {
         iceMan.slideV *= iceMan.slideAc;
         iceMan.x += iceMan.slideV;
 
-    } else iceMan.slideV = 0;
+    } else iceMan.slideV = 0; //initialize
 }
 
-function jump() {
+function checkJump() {
+    if (iceMan.jumpFlag) {
+        if (dy == 0) dy = -iceMan.jumpV;
+        dy *= iceMan.jumpAc;
 
+        //ジャンプの頂点
+        if (dy > -1) {
+            dy = -dy;
+            iceMan.jumpFlag = false;
+        }
+    }
 }
 
 function checkOnField() {
@@ -78,13 +90,15 @@ function checkOnScaffold() {
     }
 }
 
-//最大速度制限
+//加速と最大速度制限
 function checkMaxAcceleration() {
-    if (dy < dyMax) {
-        return dy *= ac;
-    } else {
-        return dy = dyMax;
-    }
+    if (!iceMan.jumpFlag) {
+        if (dy < dyMax) {
+            return dy *= ac;
+        } else {
+            return dy = dyMax;
+        }
+    } else return dy;
 }
 
 function draw() {
@@ -97,6 +111,8 @@ function draw() {
 
     xAxisMove();
     checkSlide();
+    checkJump();
+    console.log('dy = ', dy, '  jump flag : ', iceMan.jumpFlag);
 
     //-----------------------
     iceMan.x += dx;
@@ -116,14 +132,18 @@ function KeyDownHandler(e) {
     } else if (e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = true;
         iceMan.leftSlideFlag = true;
+    } else if (e.key == ' ' && dy == 0) {
+        iceMan.jumpFlag = true;
     }
 }
 
 function KeyUpHandler(e) {
     if (e.key == "Right" || e.key == "ArrowRight") {
         rightPressed = false;
+        iceMan.rightSlideFlag = false;
     } else if (e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = false;
+        iceMan.leftSlideFlag = false;
     }
 }
 
