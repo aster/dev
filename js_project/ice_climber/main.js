@@ -14,7 +14,7 @@ let y = canvas.height - 150;
 let dx = 0;
 let dy = 2;
 const dyMax = 10;
-const ac = 1.05;
+const ac = 1.08;
 
 function drawIceMan() {
     ctx.beginPath();
@@ -27,20 +27,37 @@ function drawIceMan() {
 
 }
 
+function checkOnField() {
+
+}
+
+function checkOnScaffold() {
+    //床で止めてる
+    if (y + iceMan.height + 2 > canvas.height) {
+        dy = 0;
+        y = canvas.height - iceMan.height - 2;
+    }
+
+
+}
+
+function checkMaxAcceleration() {
+    if (dy < dyMax) {
+        return dy *= ac;
+    } else {
+        return dy = dyMax;
+    }
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawIceMan();
 
-    //床で止めてる
-    if (y + iceMan.height + 3 > canvas.height) {
-        dy = 0;
-    }
-
+    checkOnScaffold();
     //-----------------------
     x += dx;
+    y += checkMaxAcceleration();
 
-    if (dy < dyMax) dy *= ac;
-    y += dy;
     requestAnimationFrame(draw);
 }
 
