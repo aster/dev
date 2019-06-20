@@ -6,14 +6,17 @@ let iceMan = {
     'width': 20,
     'color': 'white',
     'stroke': "rgba(0, 0, 255, 0.8)",
-    'dropV': 2,
     'x': canvas.width / 2 - 20 / 2, //20 -> iceMan.width
     'y': canvas.height - 150,
-    'xV': 7,
+    'dropV': 2,
+    'xV': 3,
+    'slideV': 0,
+    'slideVMax': 3,
+    'slideAc': 0.9,
+    'leftSlideFlag': false,
+    'rightSlideFlag': false,
 }
 
-//let x = canvas.width / 2 - iceMan.width / 2;
-//let y = canvas.height - 150;
 let dx = 0;
 let dy = 2;
 const dyMax = 10;
@@ -30,6 +33,36 @@ function drawIceMan() {
     ctx.fill();
     ctx.stroke();
     ctx.closePath();
+}
+
+
+function xAxisMove() {
+    if (rightPressed && iceMan.x < canvas.width - iceMan.width) {
+        iceMan.x += iceMan.xV;
+    } else if (leftPressed && iceMan.x > 0) {
+        iceMan.x -= iceMan.xV;
+    }
+}
+
+function checkSlide() {
+    if (iceMan.leftSlideFlag) {
+        iceMan.slideV = -iceMan.slideVMax;
+        iceMan.leftSlideFlag = false;
+
+    } else if (iceMan.rightSlideFlag) {
+        iceMan.slideV = iceMan.slideVMax;
+        iceMan.rightSlideFlag = false;
+    }
+
+    //slide
+    if (Math.abs(iceMan.slideV) > 0.0001) {
+        iceMan.slideV *= iceMan.slideAc;
+        iceMan.x += iceMan.slideV;
+
+    } else iceMan.slideV = 0;
+}
+
+function jump() {
 
 }
 
@@ -62,16 +95,12 @@ function draw() {
     checkOnField();
     checkOnScaffold();
 
+    xAxisMove();
+    checkSlide();
+
     //-----------------------
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
-
-    //iceman x axis move
-    if (rightPressed && iceMan.x < canvas.width - iceMan.width) {
-        iceMan.x += iceMan.xV;
-    } else if (leftPressed && iceMan.x > 0) {
-        iceMan.x -= iceMan.xV;
-    }
 
     requestAnimationFrame(draw);
 }
@@ -83,8 +112,10 @@ document.addEventListener("keyup", KeyUpHandler, false);
 function KeyDownHandler(e) {
     if (e.key == "Right" || e.key == "ArrowRight") {
         rightPressed = true;
+        iceMan.rightSlideFlag = true;
     } else if (e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = true;
+        iceMan.leftSlideFlag = true;
     }
 }
 
