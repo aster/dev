@@ -41,7 +41,8 @@ let scaffolds = {
     'holeWidth': canvas.width / 5,
     'holeNum': 1,
     'holeX': 0,
-    'entity': [],
+    'entity': [], //  [btmX1,btmX2,btmY][btmX1,btmX2,btmY][]...
+    'onFlag': false,
 
 }
 
@@ -56,7 +57,7 @@ let score = 0;
 let lives = '♥♥♥';
 
 function initScaffolds() {
-    for (let c = 0; c < 3; c++) {
+    for (let c = 0; c < 4; c++) {
         scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1));
         for (let r = 0; r < 1; r++) {
             let btmX1 = scaffolds.holeX - scaffolds.holeWidth / 2;
@@ -66,7 +67,6 @@ function initScaffolds() {
             //       |        |
             //------btmX1    btmX2--------------
             //     btmY
-
             scaffolds.entity.push([btmX1, btmX2, btmY]);
         }
     }
@@ -74,7 +74,7 @@ function initScaffolds() {
 
 function drawScaffolds() {
     for (let c = 0; c < 3; c++) {
-        let topY = scaffolds.entity[c][2] + scaffolds.height;
+        let topY = scaffolds.entity[c][2] - scaffolds.height;
         for (let n = 0; n < 1; n++) {
             ctx.beginPath();
             ctx.rect(0, topY, scaffolds.entity[c][0], scaffolds.height);
@@ -149,15 +149,36 @@ function checkJump() {
     }
 }
 
-function checkOnField() {
-
-}
-
 //床で止めてる
-function checkOnScaffold() {
+function checkFieldCollition() {
     if (iceMan.y + iceMan.height + 2 > canvas.height) {
         dy = 0;
         iceMan.y = canvas.height - iceMan.height - 2;
+        console.log(iceMan.y);
+    }
+}
+
+function checkScaffoldCollition() {
+    //足場の上で止まってたら落ちる 足場無いときだけ
+    if (scaffolds.onFlag && dy == 0) {
+        //dy = 2;
+        scaffolds.onFlag = false;
+    }
+
+    for (let scafN = 0; scafN < 4; scafN++) {
+        //check collition to scaffold btm
+        if (dy <= -1 && notBetweenHole(scafN, "T")) {
+            dy = 1; //drop
+            iceMan.jumpFlag = false; //drop
+        }
+
+        //check collition to scaffols top
+        if (dy > 0 && notBetweenHole(scafN, "B")) {
+            dy = 0; //stop on scaffold
+            iceMan.y = scaffolds.entity[scafN][2] - scaffolds.height - iceMan.height;
+            scaffolds.onFlag = true;
+        }
+
     }
 }
 
@@ -176,6 +197,19 @@ function getNowTime() {
     return Date.now() - startTime;
 }
 
+//引数は下から数えた足場の数:0~2
+// TOP or BOTTOM
+function notBetweenHole(num, TorB) {
+    let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
+
+    let checkSurface = (TorB == "T") ? iceMan.y : iceMan.y + iceMan.height;
+    let checkYAxis = scaffolds.entity[num][2] > checkSurface && checkSurface > scaffolds.entity[num][2] - scaffolds.height;
+
+    if (checkYAxis && !checkXAxis) {
+        return true;
+    } else return false;
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawIceMan();
@@ -186,14 +220,12 @@ function draw() {
 
     score = Math.ceil(getNowTime() / 1000);
 
-
-    checkOnField();
-    checkOnScaffold();
-
     xAxisMove();
     checkSlide();
     checkJump();
 
+    checkFieldCollition();
+    checkScaffoldCollition();
 
     //-----------------------
     iceMan.x += dx;
@@ -232,7 +264,6 @@ function drawScore() {
     ctx.font = "16px Comic Sans MS";
     ctx.fillStyle = "magenta";
     ctx.fillText("SCORE: " + score, 8, 20);
-
 }
 
 function drawLives() {
@@ -242,5 +273,4 @@ function drawLives() {
 }
 
 initScaffolds();
-console.log(scaffolds.entity[1]);
 draw();
