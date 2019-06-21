@@ -141,7 +141,8 @@ function checkJump() {
         if (dy == 0) dy = -iceMan.jumpV;
         dy *= iceMan.jumpAc;
 
-        //ジャンプの頂点
+
+        //ジャンプの頂点から落ちてる間
         if (dy > -1) {
             dy = -dy;
             iceMan.jumpFlag = false;
@@ -159,17 +160,10 @@ function checkFieldCollition() {
 }
 
 function checkScaffoldCollition() {
-    //足場の上で止まってたら落ちる 足場無いときだけ
-    if (scaffolds.onFlag && dy == 0) {
-        //dy = 2;
-        scaffolds.onFlag = false;
-    }
-
     for (let scafN = 0; scafN < 4; scafN++) {
         //check collition to scaffold btm
         if (dy <= -1 && notBetweenHole(scafN, "T")) {
             dy = 1; //drop
-            iceMan.jumpFlag = false; //drop
         }
 
         //check collition to scaffols top
@@ -179,6 +173,12 @@ function checkScaffoldCollition() {
             scaffolds.onFlag = true;
         }
 
+        //check drop hole
+        if (scaffolds.onFlag && dy == 0 && betweenHole(scafN)) {
+            dy = 2;
+            scaffolds.onFlag = false;
+            console.log('on hole');
+        }
     }
 }
 
@@ -197,6 +197,11 @@ function getNowTime() {
     return Date.now() - startTime;
 }
 
+//無いと上に吹っ飛んでく
+function setJumpFlag() {
+    if (dy > 0) iceMan.jumpFlag = false; //drop
+}
+
 //引数は下から数えた足場の数:0~2
 // TOP or BOTTOM
 function notBetweenHole(num, TorB) {
@@ -208,6 +213,20 @@ function notBetweenHole(num, TorB) {
     if (checkYAxis && !checkXAxis) {
         return true;
     } else return false;
+}
+
+//引数は下から数えた足場の数:0~2
+function betweenHole(num) {
+    const margin = 2;
+    let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
+    let checkSurface = iceMan.y + iceMan.height;
+    let checkYAxis = scaffolds.entity[num][2] > checkSurface && checkSurface > scaffolds.entity[num][2] - scaffolds.height - margin;
+
+    if (checkYAxis && checkXAxis) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function draw() {
@@ -226,8 +245,10 @@ function draw() {
 
     checkFieldCollition();
     checkScaffoldCollition();
+    if (iceMan.jumpFlag) console.log('true');
 
     //-----------------------
+    setJumpFlag();
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
 
