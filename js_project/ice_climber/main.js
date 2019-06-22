@@ -245,7 +245,6 @@ function draw() {
 
     checkFieldCollition();
     checkScaffoldCollition();
-    if (iceMan.jumpFlag) console.log('true');
 
     //-----------------------
     setJumpFlag();
