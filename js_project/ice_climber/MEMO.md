@@ -30,3 +30,31 @@ class派生させるのは無駄？
 | tutorial|touch box|
 | playing |lives -> 0|
 | end     |Enter    |
+<br>
+
+## 詳細:
+
+### **start** 
+自機を選ぶ  
+速度や滑り具合パラメータを弄る  
+Enterで遷移  
+<br>
+
+### **tutorial**
+iceManを操作して、startスイッチを押す  
+下から針が出てきてゲーム開始  
+<br>
+
+### **playing**
+画面スクロール  
+登り続ける  
+なんかギミック欲しい(アイテムとか)  
+`if (life > 0) iceMan昇天,リスタート`   
+`else endに遷移`  
+<br>
+
+### **end**
+点数と*ランキングが出る    
+Enterで再チャレ  
+
+
