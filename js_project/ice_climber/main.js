@@ -1,7 +1,78 @@
 var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
 
+let mouseAxis = [0, 0];
+let mouseState = false;
 
+//for game start -----------------------------
+{
+    let fillCount = 0;
+    let climber = ["C", "L", "I", "M", "B", "E", "R"];
+    let Height = [310, 310, 310, 310, 310, 310, 310];
+    let marginCh = 50;
+    const reducer = (accumulator, currentValue) => accumulator + currentValue;
+    let gsColor = "#ccc";
+
+    function mouseOver() {
+
+    }
+
+    function mouseClick() {
+
+    }
+
+    function drawTitle() {
+        ctx.fillStyle = "#00ffff";
+        fillCount < 255 ? fillCount += 5 : 1;
+        fillColor = "#" + fillCount.toString(16) + "ffff";
+
+        ctx.font = "80px Comic Sans MS";
+        ctx.fillStyle = fillColor;
+        ctx.strokeStyle = "blue";
+        ctx.fillText("ICE", 50, 100);
+        ctx.strokeText("ICE", 50, 100);
+
+        ctx.font = "80px Comic Sans MS";
+        ctx.fillStyle = "#963";
+        ctx.strokeStyle = "000";
+        for (let cnt = 0; cnt < 7; cnt++) {
+            marginCh = cnt == 3 ? 46 : 50;
+            ctx.fillText(climber[cnt], 80 + cnt * marginCh, Height[cnt]);
+            ctx.strokeText(climber[cnt], 80 + cnt * marginCh, Height[cnt]);
+        }
+        let upHeight = Math.floor(Math.random() * 7);
+        Height[upHeight] > 180 && fillColor == "#ffffff" ? Height[upHeight] -= 5 : 1;
+
+        if (Height.reduce(reducer) == 1260) {
+            ctx.fillStyle = "black";
+            ctx.strokeStyle = "black";
+            ctx.font = "15px Arial black";
+            ctx.fillText("↖click here", 350, 310);
+            ctx.strokeText("↖click here", 350, 310);
+
+            //mouse over & click => next state
+            if (120 < mouseAxis[0] && mouseAxis[0] < 410 && 267 < mouseAxis[1] && mouseAxis[1] < 296) {
+
+                gsColor = "#333";
+
+                if (mouseState) {
+                    mousestate = false;
+                    nowState = "playing";
+                }
+            } else gsColor = "#ccc";
+
+            ctx.fillStyle = gsColor;
+            ctx.strokeStyle = gsColor;
+            ctx.font = "40px Arial black";
+            ctx.fillText("GAME START", 90, 280);
+            ctx.strokeText("GAME START", 90, 280);
+
+
+
+        }
+
+    }
+}
 //オブジェクトたち-----------------------------
 let iceMan = {
     'height': 20,
@@ -250,21 +321,20 @@ function betweenHole(num) {
 
 
 //for state transition------------------------------
-let state = {
-    start: 1,
-    tutorial: 2,
-    playing: 3,
-    end: 4,
+let nowState = "start";
+
+function gameStart() {
+    drawTitle();
+
+
 }
 
-let nowState = state.start;
+function gameTutorial() {
 
+}
 
+function gamePlaying() {
 
-//main function----------------------------
-function draw() {
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawIceMan();
     drawNeedles();
     drawScaffolds();
@@ -286,8 +356,47 @@ function draw() {
     iceMan.y += checkMaxAcceleration();
 
 
+}
+
+function gameEnd() {
+
+}
+
+//main function----------------------------
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    switch (nowState) {
+        case "start":
+            gameStart();
+            break;
+        case "tutorial":
+            gameTutorial();
+            break;
+        case "playing":
+            gamePlaying();
+            break;
+        case "end":
+            gameEnd();
+            break;
+    }
+
     requestAnimationFrame(draw);
 }
+
+//function for mouse--------------------------------------- 
+document.addEventListener('mousemove', getMouseAxis);
+document.addEventListener('mousedown', getMouseDown);
+
+function getMouseAxis(e) {
+    mouseAxis[0] = e.clientX;
+    mouseAxis[1] = e.clientY;
+}
+
+function getMouseDown() {
+    mouseState = true;
+}
+
 
 
 //functions for key input------------------------------ 
