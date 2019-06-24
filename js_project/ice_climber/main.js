@@ -57,7 +57,7 @@ let mouseState = false;
 
                 if (mouseState) {
                     mousestate = false;
-                    nowState = "playing";
+                    nextState();
                 }
             } else gsColor = "#ccc";
 
@@ -73,14 +73,17 @@ let mouseState = false;
 
     }
 }
+
 //オブジェクトたち-----------------------------
 let iceMan = {
     'height': 20,
     'width': 20,
     'color': 'white',
     'stroke': "rgba(0, 0, 255, 0.5)",
-    'x': canvas.width / 2 - 20 / 2, //20 -> iceMan.width
-    'y': canvas.height - 150,
+    //'x': canvas.width / 2 - 20 / 2, //20 -> iceMan.width
+    //'y': canvas.height - 150,
+    'x': 70,
+    'y': 260,
 
     'jumpV': 25,
     'jumpAc': 0.8,
@@ -131,7 +134,8 @@ let lives = '♥♥♥';
 
 function initScaffolds() {
     for (let c = 0; c < 4; c++) {
-        scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1));
+        const min = scaffolds.holeWidth / 2;
+        scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1 - min) + min);
         for (let r = 0; r < 1; r++) {
             let btmX1 = scaffolds.holeX - scaffolds.holeWidth / 2;
             let btmX2 = btmX1 + scaffolds.holeWidth;
@@ -325,11 +329,25 @@ let nowState = "start";
 
 function gameStart() {
     drawTitle();
-
-
 }
 
 function gameTutorial() {
+
+    drawIceMan();
+    drawScaffolds();
+    drawLives();
+
+    xAxisMove();
+    checkSlide();
+    checkJump();
+
+    checkFieldCollition();
+    checkScaffoldCollition();
+
+    //この下は弄らない-----------------
+    setJumpFlag();
+    iceMan.x += dx;
+    iceMan.y += checkMaxAcceleration();
 
 }
 
@@ -362,6 +380,12 @@ function gameEnd() {
 
 }
 
+function nextState() {
+    if (nowState == "start") nowState = "tutorial";
+    else if (nowState == "tutorial") nowState = "playing";
+    else if (nowState == "playing") nowState = "end";
+}
+
 //main function----------------------------
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -391,6 +415,7 @@ document.addEventListener('mousedown', getMouseDown);
 function getMouseAxis(e) {
     mouseAxis[0] = e.clientX;
     mouseAxis[1] = e.clientY;
+    console.log("mouseAxis: ", mouseAxis);
 }
 
 function getMouseDown() {
