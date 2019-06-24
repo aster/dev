@@ -1,6 +1,8 @@
 var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
 
+
+//オブジェクトたち-----------------------------
 let iceMan = {
     'height': 20,
     'width': 20,
@@ -72,6 +74,18 @@ function initScaffolds() {
     }
 }
 
+
+//draw functions -----------------------------
+function drawIceMan() {
+    ctx.beginPath();
+    ctx.rect(iceMan.x, iceMan.y, iceMan.width, iceMan.height);
+    ctx.fillStyle = iceMan.color;
+    ctx.strokeStyle = iceMan.stroke;
+    ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+}
+
 function drawScaffolds() {
     for (let c = 0; c < 3; c++) {
         let topY = scaffolds.entity[c][2] - scaffolds.height;
@@ -103,16 +117,24 @@ function drawNeedles() {
     }
 }
 
-function drawIceMan() {
-    ctx.beginPath();
-    ctx.rect(iceMan.x, iceMan.y, iceMan.width, iceMan.height);
-    ctx.fillStyle = iceMan.color;
-    ctx.strokeStyle = iceMan.stroke;
-    ctx.fill();
-    ctx.stroke();
-    ctx.closePath();
+function getNowTime() {
+    return Date.now() - startTime;
 }
 
+function drawScore() {
+    ctx.font = "16px Comic Sans MS";
+    ctx.fillStyle = "magenta";
+    ctx.fillText("SCORE: " + score, 8, 20);
+}
+
+function drawLives() {
+    ctx.font = "16px Comic Sans MS";
+    ctx.fillStyle = "magenta";
+    ctx.fillText("LIVES: " + lives, 8, 45);
+}
+
+
+//functions for iceMan moving-----------------------------
 function xAxisMove() {
     if (rightPressed && insideRightWall()) {
         iceMan.x += iceMan.xV;
@@ -193,9 +215,6 @@ function checkMaxAcceleration() {
     } else return dy;
 }
 
-function getNowTime() {
-    return Date.now() - startTime;
-}
 
 //無いと上に吹っ飛んでく
 function setJumpFlag() {
@@ -229,7 +248,22 @@ function betweenHole(num) {
     }
 }
 
+
+//for state transition------------------------------
+let state = {
+    start: 1,
+    tutorial: 2,
+    playing: 3,
+    end: 4,
+}
+
+let nowState = state.start;
+
+
+
+//main function----------------------------
 function draw() {
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawIceMan();
     drawNeedles();
@@ -246,15 +280,17 @@ function draw() {
     checkFieldCollition();
     checkScaffoldCollition();
 
-    //-----------------------
+    //この下は弄らない-----------------
     setJumpFlag();
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
+
 
     requestAnimationFrame(draw);
 }
 
 
+//functions for key input------------------------------ 
 document.addEventListener("keydown", KeyDownHandler, false);
 document.addEventListener("keyup", KeyUpHandler, false);
 
@@ -280,17 +316,6 @@ function KeyUpHandler(e) {
     }
 }
 
-function drawScore() {
-    ctx.font = "16px Comic Sans MS";
-    ctx.fillStyle = "magenta";
-    ctx.fillText("SCORE: " + score, 8, 20);
-}
-
-function drawLives() {
-    ctx.font = "16px Comic Sans MS";
-    ctx.fillStyle = "magenta";
-    ctx.fillText("LIVES: " + lives, 8, 45);
-}
-
+//start program!----------------------------------------
 initScaffolds();
 draw();
