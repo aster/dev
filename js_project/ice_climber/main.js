@@ -13,14 +13,6 @@ let mouseState = false;
     const reducer = (accumulator, currentValue) => accumulator + currentValue;
     let gsColor = "#ccc";
 
-    function mouseOver() {
-
-    }
-
-    function mouseClick() {
-
-    }
-
     function drawTitle() {
         ctx.fillStyle = "#00ffff";
         fillCount < 255 ? fillCount += 5 : 1;
@@ -56,7 +48,7 @@ let mouseState = false;
                 gsColor = "#333";
 
                 if (mouseState) {
-                    mousestate = false;
+                    mouseState = false;
                     nextState();
                 }
             } else gsColor = "#ccc";
@@ -66,11 +58,7 @@ let mouseState = false;
             ctx.font = "40px Arial black";
             ctx.fillText("GAME START", 90, 280);
             ctx.strokeText("GAME START", 90, 280);
-
-
-
         }
-
     }
 }
 
@@ -121,6 +109,16 @@ let scaffolds = {
     'onFlag': false,
 
 }
+
+let hatenaBlock = {
+    'x': 430,
+    'y': 20,
+    'width': 35,
+    'height': 35,
+    'color': "#f8d300",
+}
+let img = new Image();
+img.src = 'img/hatena_block.jpeg';
 
 let rightPressed = false;
 let leftPressed = false;
@@ -192,6 +190,12 @@ function drawNeedles() {
     }
 }
 
+function growNeedle() {
+    //needle height を弄る
+    console.log('grow needle');
+
+}
+
 function getNowTime() {
     return Date.now() - startTime;
 }
@@ -207,6 +211,21 @@ function drawLives() {
     ctx.fillStyle = "magenta";
     ctx.fillText("LIVES: " + lives, 8, 45);
 }
+
+function drawOperation() {
+    ctx.fillStyle = "black";
+    ctx.strokeStyle = "black";
+    ctx.font = "14px Comic Sans MS";
+    ctx.fillText("  JUMP : [space]", 350, 270);
+    ctx.fillText("   LEFT : ←", 351, 290);
+    ctx.fillText("RIGHT : →", 352, 310);
+}
+
+function drawStartButton() {
+    hatenaBlock.x = scaffolds.entity[2][0] + scaffolds.holeWidth / 2 - hatenaBlock.width / 2;
+    ctx.drawImage(img, hatenaBlock.x, hatenaBlock.y, hatenaBlock.width, hatenaBlock.height);
+}
+
 
 
 //functions for iceMan moving-----------------------------
@@ -237,7 +256,6 @@ function checkJump() {
     if (iceMan.jumpFlag) {
         if (dy == 0) dy = -iceMan.jumpV;
         dy *= iceMan.jumpAc;
-
 
         //ジャンプの頂点から落ちてる間
         if (dy > -1) {
@@ -323,6 +341,17 @@ function betweenHole(num) {
     }
 }
 
+function checkBoxCollition() {
+    if (hatenaBlock.x - iceMan.width < iceMan.x && iceMan.x < hatenaBlock.x + hatenaBlock.width) {
+        if (hatenaBlock.y + hatenaBlock.height > iceMan.y) {
+            console.log('touch');
+
+            return true;
+        }
+    } else return false;
+
+}
+
 
 //for state transition------------------------------
 let nowState = "start";
@@ -335,7 +364,8 @@ function gameTutorial() {
 
     drawIceMan();
     drawScaffolds();
-    drawLives();
+    drawStartButton();
+    drawOperation();
 
     xAxisMove();
     checkSlide();
@@ -343,12 +373,12 @@ function gameTutorial() {
 
     checkFieldCollition();
     checkScaffoldCollition();
+    if (checkBoxCollition()) growNeedle();
 
     //この下は弄らない-----------------
     setJumpFlag();
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
-
 }
 
 function gamePlaying() {
@@ -372,8 +402,6 @@ function gamePlaying() {
     setJumpFlag();
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
-
-
 }
 
 function gameEnd() {
@@ -411,6 +439,7 @@ function draw() {
 //function for mouse--------------------------------------- 
 document.addEventListener('mousemove', getMouseAxis);
 document.addEventListener('mousedown', getMouseDown);
+document.addEventListener('mouseup', getMouseUp);
 
 function getMouseAxis(e) {
     mouseAxis[0] = e.clientX;
@@ -422,7 +451,9 @@ function getMouseDown() {
     mouseState = true;
 }
 
-
+function getMouseUp() {
+    mouseState = false;
+}
 
 //functions for key input------------------------------ 
 document.addEventListener("keydown", KeyDownHandler, false);
