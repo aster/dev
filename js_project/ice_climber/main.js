@@ -92,7 +92,7 @@ const ac = 1.25;
 
 let needle = {
     'width': 10,
-    'height': 20,
+    'height': 0, //max 20
     'count': 50,
     'margin': 1,
 }
@@ -191,9 +191,12 @@ function drawNeedles() {
 }
 
 function growNeedle() {
-    //needle height を弄る
-    console.log('grow needle');
-
+    if (needle.height < 21) {
+        needle.height += 0.3;
+    } else {
+        //tutorial end
+        nextState();
+    }
 }
 
 function getNowTime() {
@@ -365,20 +368,25 @@ function gameTutorial() {
     drawIceMan();
     drawScaffolds();
     drawStartButton();
-    drawOperation();
 
-    xAxisMove();
-    checkSlide();
-    checkJump();
+    if (checkBoxCollition()) {
+        drawNeedles();
+        growNeedle();
 
-    checkFieldCollition();
-    checkScaffoldCollition();
-    if (checkBoxCollition()) growNeedle();
+    } else {
+        drawOperation();
+        xAxisMove();
+        checkSlide();
+        checkJump();
 
-    //この下は弄らない-----------------
-    setJumpFlag();
-    iceMan.x += dx;
-    iceMan.y += checkMaxAcceleration();
+        checkFieldCollition();
+        checkScaffoldCollition();
+
+        //この下は弄らない-----------------
+        setJumpFlag();
+        iceMan.x += dx;
+        iceMan.y += checkMaxAcceleration();
+    }
 }
 
 function gamePlaying() {
