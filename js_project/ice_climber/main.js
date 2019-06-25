@@ -118,7 +118,9 @@ let hatenaBlock = {
     'color': "#f8d300",
 }
 let img = new Image();
+let gameOver = new Image();
 img.src = 'img/hatena_block.jpeg';
+gameOver.src = 'img/game_over.jpg';
 
 let rightPressed = false;
 let leftPressed = false;
@@ -229,6 +231,11 @@ function drawStartButton() {
     ctx.drawImage(img, hatenaBlock.x, hatenaBlock.y, hatenaBlock.width, hatenaBlock.height);
 }
 
+function drawGameOver() {
+    ctx.drawImage(gameOver, 0, 0, 480, 320);
+}
+
+
 
 
 //functions for iceMan moving-----------------------------
@@ -268,12 +275,10 @@ function checkJump() {
     }
 }
 
-//床で止めてる
 function checkFieldCollition() {
     if (iceMan.y + iceMan.height + 2 > canvas.height) {
         dy = 0;
         iceMan.y = canvas.height - iceMan.height - 2;
-        console.log(iceMan.y);
     }
 }
 
@@ -311,13 +316,12 @@ function checkMaxAcceleration() {
     } else return dy;
 }
 
-
 //無いと上に吹っ飛んでく
 function setJumpFlag() {
     if (dy > 0) iceMan.jumpFlag = false; //drop
 }
 
-//引数は下から数えた足場の数:0~2
+//引数は下から数えた足場の数:0~3
 // TOP or BOTTOM
 function notBetweenHole(num, TorB) {
     let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
@@ -330,7 +334,7 @@ function notBetweenHole(num, TorB) {
     } else return false;
 }
 
-//引数は下から数えた足場の数:0~2
+//引数は下から数えた足場の数:0~3
 function betweenHole(num) {
     const margin = 2;
     let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
@@ -352,7 +356,18 @@ function checkBoxCollition() {
             return true;
         }
     } else return false;
+}
 
+function checkDead() {
+    if (iceMan.y > 290) {
+        lives = lives.slice(0, -1);
+        dy = 2;
+        iceMan.y = 30;
+        console.log('dead');
+    }
+    if (lives == '') {
+        nextState();
+    }
 }
 
 
@@ -406,6 +421,10 @@ function gamePlaying() {
     checkFieldCollition();
     checkScaffoldCollition();
 
+    checkDead();
+
+    console.log('plying');
+
     //この下は弄らない-----------------
     setJumpFlag();
     iceMan.x += dx;
@@ -413,6 +432,7 @@ function gamePlaying() {
 }
 
 function gameEnd() {
+    drawGameOver();
 
 }
 
