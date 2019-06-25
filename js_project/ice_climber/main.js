@@ -423,8 +423,6 @@ function gamePlaying() {
 
     checkDead();
 
-    console.log('plying');
-
     //この下は弄らない-----------------
     setJumpFlag();
     iceMan.x += dx;
