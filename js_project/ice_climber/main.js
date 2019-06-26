@@ -27,6 +27,8 @@ let mouseState = false;
         ctx.font = "80px Comic Sans MS";
         ctx.fillStyle = "#963";
         ctx.strokeStyle = "000";
+
+
         for (let cnt = 0; cnt < 7; cnt++) {
             marginCh = cnt == 3 ? 46 : 50;
             ctx.fillText(climber[cnt], 80 + cnt * marginCh, Height[cnt]);
@@ -39,10 +41,11 @@ let mouseState = false;
             ctx.fillStyle = "black";
             ctx.strokeStyle = "black";
             ctx.font = "15px Arial black";
-            ctx.fillText("↖click here", 350, 310);
-            ctx.strokeText("↖click here", 350, 310);
+            ctx.fillText("↖or click here", 350, 310);
+            ctx.strokeText("↖or click here", 350, 310);
 
             //mouse over & click => next state
+            //or press anyKey => next stage
             if (120 < mouseAxis[0] && mouseAxis[0] < 410 && 267 < mouseAxis[1] && mouseAxis[1] < 296) {
 
                 gsColor = "#333";
@@ -53,11 +56,18 @@ let mouseState = false;
                 }
             } else gsColor = "#ccc";
 
+            if (anyPressed) {
+                nextState();
+            }
+
             ctx.fillStyle = gsColor;
             ctx.strokeStyle = gsColor;
             ctx.font = "40px Arial black";
-            ctx.fillText("GAME START", 90, 280);
-            ctx.strokeText("GAME START", 90, 280);
+            ctx.fillText("PRESS ANY KEY", 60, 280);
+            ctx.strokeText("PRESS ANY KEY", 60, 280);
+
+        } else {
+            anyPressed = false;
         }
     }
 }
@@ -124,6 +134,7 @@ gameOver.src = 'img/game_over.jpg';
 
 let rightPressed = false;
 let leftPressed = false;
+let anyPressed = false;
 
 const insideRightWall = () => iceMan.x < canvas.width - iceMan.width;
 const insideLeftWall = () => iceMan.x > 0;
@@ -485,6 +496,7 @@ function getMouseUp() {
 //functions for key input------------------------------ 
 document.addEventListener("keydown", KeyDownHandler, false);
 document.addEventListener("keyup", KeyUpHandler, false);
+document.addEventListener("keydown", anyKeyDownHandler, false);
 
 function KeyDownHandler(e) {
     if (e.key == "Right" || e.key == "ArrowRight") {
@@ -505,6 +517,13 @@ function KeyUpHandler(e) {
     } else if (e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = false;
         iceMan.leftSlideFlag = false;
+    }
+}
+
+function anyKeyDownHandler(e) {
+    if (e.key) {
+        anyPressed = true;
+        console.log(anyPressed);
     }
 }
 
