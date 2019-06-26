@@ -128,7 +128,7 @@ let leftPressed = false;
 const insideRightWall = () => iceMan.x < canvas.width - iceMan.width;
 const insideLeftWall = () => iceMan.x > 0;
 
-const startTime = Date.now();
+let startTime = 0; //tmp
 let score = 0;
 let lives = '♥♥♥';
 
@@ -197,6 +197,7 @@ function growNeedle() {
         needle.height += 0.3;
     } else {
         //tutorial end
+        startTime = Date.now();
         nextState();
     }
 }
