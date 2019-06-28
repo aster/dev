@@ -117,7 +117,9 @@ let scaffolds = {
     'holeX': 0,
     'entity': [], //  [btmX1,btmX2,btmY][btmX1,btmX2,btmY][]...
     'onFlag': false,
+    'onN': 0,
     'downV': 0.5,
+    'visibleN': 5,
 
 }
 
@@ -145,7 +147,7 @@ let score = 0;
 let lives = '♥♥♥';
 
 function initScaffolds() {
-    for (let c = 0; c < 4; c++) {
+    for (let c = 0; c < scaffolds.visibleN; c++) {
         const min = scaffolds.holeWidth / 2;
         scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1 - min) + min);
         for (let r = 0; r < 1; r++) {
@@ -162,7 +164,7 @@ function initScaffolds() {
 }
 
 function updateScaffolds() {
-    for (let c = 0; c < 4; c++) {
+    for (let c = 0; c < scaffolds.visibleN; c++) {
         scaffolds.entity[c][2] += scaffolds.downV;
         scaffolds.y += scaffolds.downV;
     }
@@ -181,7 +183,7 @@ function drawIceMan() {
 }
 
 function drawScaffolds() {
-    for (let c = 0; c < 4; c++) {
+    for (let c = 0; c < scaffolds.visibleN; c++) {
         let topY = scaffolds.entity[c][2] - scaffolds.height;
         for (let n = 0; n < 1; n++) {
             ctx.beginPath();
@@ -303,7 +305,7 @@ function checkFieldCollition() {
 }
 
 function checkScaffoldCollition() {
-    for (let scafN = 0; scafN < 4; scafN++) {
+    for (let scafN = 0; scafN < scaffolds.visibleN; scafN++) {
         //check collition to scaffold btm
         if (dy < 0 && notBetweenHole(scafN, "T")) {
             dy = 1; //drop
@@ -311,16 +313,15 @@ function checkScaffoldCollition() {
 
         //check collition to scaffols top
         if (dy > 0 && notBetweenHole(scafN, "B")) {
-            //dy = 0; //stop on scaffold
-            if (nowState == 'tutorial') {
-                dy = 0;
-            } else {
-                //dy = scaffolds.downV;
-                dy = 0;
-            }
+            dy = 0; //stop on scaffold
 
             iceMan.y = scaffolds.entity[scafN][2] - scaffolds.height - iceMan.height;
             scaffolds.onFlag = true;
+            scaffolds.onN = scafN;
+
+        } else if (dy == 0 && nowState == 'playing') {
+            iceMan.y = scaffolds.entity[scaffolds.onN][2] - scaffolds.height - iceMan.height;
+
         }
 
         //check drop hole
@@ -350,7 +351,7 @@ function setJumpFlag() {
 
 //引数は下から数えた足場の数:0~3
 // TOP or BOTTOM
-//Y軸は、足場にめり込んでるか判定
+//Y軸は、足場にめり込んでる位置か判定
 function notBetweenHole(num, TorB) {
     let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
 
@@ -528,10 +529,6 @@ function KeyDownHandler(e) {
     } else if (e.key == ' ' && dy == 0) {
         iceMan.jumpFlag = true;
     }
-
-    //else if (e.key == ' ' && dy <= 0) {
-    //   iceMan.jumpFlag = true;
-    //}
 }
 
 function KeyUpHandler(e) {
