@@ -337,10 +337,13 @@ function checkScaffoldCollition() {
 function checkMaxAcceleration() {
     if (!iceMan.jumpFlag) {
         if (dy < dyMax) {
-            return dy *= ac;
+            if (dy >= 0) return dy *= ac;
+            else return dy = Math.abs(dy); //上に吹っ飛ぶの防止
+
         } else {
             return dy = dyMax;
         }
+
     } else return dy;
 }
 
