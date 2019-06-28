@@ -117,6 +117,7 @@ let scaffolds = {
     'holeX': 0,
     'entity': [], //  [btmX1,btmX2,btmY][btmX1,btmX2,btmY][]...
     'onFlag': false,
+    'downV': 0.5,
 
 }
 
@@ -160,6 +161,13 @@ function initScaffolds() {
     }
 }
 
+function updateScaffolds() {
+    for (let c = 0; c < 4; c++) {
+        scaffolds.entity[c][2] += scaffolds.downV;
+        scaffolds.y += scaffolds.downV;
+    }
+}
+
 
 //draw functions -----------------------------
 function drawIceMan() {
@@ -173,7 +181,7 @@ function drawIceMan() {
 }
 
 function drawScaffolds() {
-    for (let c = 0; c < 3; c++) {
+    for (let c = 0; c < 4; c++) {
         let topY = scaffolds.entity[c][2] - scaffolds.height;
         for (let n = 0; n < 1; n++) {
             ctx.beginPath();
@@ -248,8 +256,6 @@ function drawGameOver() {
 }
 
 
-
-
 //functions for iceMan moving-----------------------------
 function xAxisMove() {
     if (rightPressed && insideRightWall()) {
@@ -275,8 +281,9 @@ function checkSlide() {
 }
 
 function checkJump() {
+    //console.log('jumpflag: ', iceMan.jumpFlag);
     if (iceMan.jumpFlag) {
-        if (dy == 0) dy = -iceMan.jumpV;
+        if ((nowState == "tutorial" && dy == 0) || (nowState == "playing" && dy == 0)) dy = -iceMan.jumpV;
         dy *= iceMan.jumpAc;
 
         //ジャンプの頂点から落ちてる間
@@ -286,6 +293,7 @@ function checkJump() {
         }
     }
 }
+
 
 function checkFieldCollition() {
     if (iceMan.y + iceMan.height + 2 > canvas.height) {
@@ -297,13 +305,20 @@ function checkFieldCollition() {
 function checkScaffoldCollition() {
     for (let scafN = 0; scafN < 4; scafN++) {
         //check collition to scaffold btm
-        if (dy <= -1 && notBetweenHole(scafN, "T")) {
+        if (dy < 0 && notBetweenHole(scafN, "T")) {
             dy = 1; //drop
         }
 
         //check collition to scaffols top
         if (dy > 0 && notBetweenHole(scafN, "B")) {
-            dy = 0; //stop on scaffold
+            //dy = 0; //stop on scaffold
+            if (nowState == 'tutorial') {
+                dy = 0;
+            } else {
+                //dy = scaffolds.downV;
+                dy = 0;
+            }
+
             iceMan.y = scaffolds.entity[scafN][2] - scaffolds.height - iceMan.height;
             scaffolds.onFlag = true;
         }
@@ -330,11 +345,12 @@ function checkMaxAcceleration() {
 
 //無いと上に吹っ飛んでく
 function setJumpFlag() {
-    if (dy > 0) iceMan.jumpFlag = false; //drop
+    if (dy > scaffolds.downV) iceMan.jumpFlag = false; //droping
 }
 
 //引数は下から数えた足場の数:0~3
 // TOP or BOTTOM
+//Y軸は、足場にめり込んでるか判定
 function notBetweenHole(num, TorB) {
     let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
 
@@ -347,6 +363,7 @@ function notBetweenHole(num, TorB) {
 }
 
 //引数は下から数えた足場の数:0~3
+//穴の上部のmargin
 function betweenHole(num) {
     const margin = 2;
     let checkXAxis = iceMan.x > scaffolds.entity[num][0] && iceMan.x + iceMan.width < scaffolds.entity[num][1];
@@ -384,7 +401,8 @@ function checkDead() {
 
 
 //for state transition------------------------------
-let nowState = "start";
+let nowState = "tutorial";
+//let nowState = "start";
 
 function gameStart() {
     drawTitle();
@@ -410,7 +428,7 @@ function gameTutorial() {
         checkScaffoldCollition();
 
         //この下は弄らない-----------------
-        setJumpFlag();
+        //setJumpFlag();
         iceMan.x += dx;
         iceMan.y += checkMaxAcceleration();
     }
@@ -420,6 +438,7 @@ function gamePlaying() {
 
     drawIceMan();
     drawNeedles();
+    updateScaffolds();
     drawScaffolds();
     drawLives();
     drawScore();
@@ -436,7 +455,7 @@ function gamePlaying() {
     checkDead();
 
     //この下は弄らない-----------------
-    setJumpFlag();
+    //setJumpFlag();
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
 }
@@ -472,6 +491,7 @@ function draw() {
     }
 
     requestAnimationFrame(draw);
+
 }
 
 //function for mouse--------------------------------------- 
@@ -508,6 +528,10 @@ function KeyDownHandler(e) {
     } else if (e.key == ' ' && dy == 0) {
         iceMan.jumpFlag = true;
     }
+
+    //else if (e.key == ' ' && dy <= 0) {
+    //   iceMan.jumpFlag = true;
+    //}
 }
 
 function KeyUpHandler(e) {
@@ -523,7 +547,6 @@ function KeyUpHandler(e) {
 function anyKeyDownHandler(e) {
     if (e.key) {
         anyPressed = true;
-        console.log(anyPressed);
     }
 }
 
