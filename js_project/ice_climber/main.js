@@ -143,7 +143,7 @@ const insideLeftWall = () => iceMan.x > 0;
 
 let startTime = 0; //tmp
 let score = 0;
-let lives = '♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥';
+let lives = '♥♥♥';
 
 function addScaffolds() {
     const min = scaffolds.holeWidth / 2;
@@ -275,7 +275,18 @@ function drawStartButton() {
 
 function drawGameOver() {
     ctx.drawImage(gameOver, 0, 0, 480, 320);
+
+
+    if (getNowTime() % 1000 > 500) ctx.fillStyle = 'yellow';
+    else ctx.fillStyle = '#960';
+    ctx.font = "40px Comic Sans MS";
+    ctx.strokeStyle = "black";
+    ctx.fillText("PRESS ENTER", 100, 280);
+    ctx.strokeText("PRESS ENTER", 100, 280);
+
+
 }
+
 
 
 //functions for iceMan moving-----------------------------
@@ -418,8 +429,9 @@ function checkDead() {
 
 
 //for state transition------------------------------
-let nowState = "tutorial";
-//let nowState = "start";
+//let nowState = "end";
+//let nowState = "tutorial";
+let nowState = "start";
 
 function gameStart() {
     drawTitle();
@@ -542,6 +554,8 @@ function KeyDownHandler(e) {
         iceMan.leftSlideFlag = true;
     } else if (e.key == ' ' && dy == 0) {
         iceMan.jumpFlag = true;
+    } else if (e.key == 'Enter' && nowState == 'end') {
+        location.reload();
     }
 }
 
