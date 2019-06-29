@@ -146,27 +146,42 @@ let startTime = 0; //tmp
 let score = 0;
 let lives = '♥♥♥';
 
-function initScaffolds() {
-    for (let c = 0; c < scaffolds.visibleN; c++) {
-        const min = scaffolds.holeWidth / 2;
-        scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1 - min) + min);
-        for (let r = 0; r < 1; r++) {
-            let btmX1 = scaffolds.holeX - scaffolds.holeWidth / 2;
-            let btmX2 = btmX1 + scaffolds.holeWidth;
-            let btmY = scaffolds.y - c * scaffolds.interval;
-            //-------+        +-------------
-            //       |        |
-            //------btmX1    btmX2--------------
-            //     btmY
-            scaffolds.entity.push([btmX1, btmX2, btmY]);
-        }
+function addScaffolds() {
+    const min = scaffolds.holeWidth / 2;
+    scaffolds.holeX = Math.floor(Math.random() * (canvas.width - scaffolds.holeWidth + 1 - min) + min);
+    let btmX1 = scaffolds.holeX - scaffolds.holeWidth / 2;
+    let btmX2 = btmX1 + scaffolds.holeWidth;
+
+    if (scaffolds.entity.length) {
+        //entity is exist
+        var btmY = scaffolds.entity[scaffolds.entity.length - 1][2] - scaffolds.interval;
+    } else {
+        //entity is none
+        var btmY = scaffolds.y;
     }
+
+    //let btmY = scaffolds.y - c * scaffolds.interval;
+    //-------+        +-------------
+    //       |        |
+    //------btmX1    btmX2--------------
+    //     btmY
+    scaffolds.entity.push([btmX1, btmX2, btmY]);
+}
+
+function initScaffolds() {
+    for (let c = 0; c < scaffolds.visibleN; c++) addScaffolds();
 }
 
 function updateScaffolds() {
     for (let c = 0; c < scaffolds.visibleN; c++) {
         scaffolds.entity[c][2] += scaffolds.downV;
         scaffolds.y += scaffolds.downV;
+    }
+
+    if (scaffolds.entity[0][2] - scaffolds.height > canvas.height) {
+        scaffolds.entity.shift();
+        scaffolds.onN--;
+        addScaffolds();
     }
 }
 
@@ -194,7 +209,6 @@ function drawScaffolds() {
             ctx.fill();
             ctx.stroke();
             ctx.closePath();
-
         }
     }
 }
@@ -283,7 +297,6 @@ function checkSlide() {
 }
 
 function checkJump() {
-    //console.log('jumpflag: ', iceMan.jumpFlag);
     if (iceMan.jumpFlag) {
         if ((nowState == "tutorial" && dy == 0) || (nowState == "playing" && dy == 0)) dy = -iceMan.jumpV;
         dy *= iceMan.jumpAc;
@@ -319,9 +332,8 @@ function checkScaffoldCollition() {
             scaffolds.onFlag = true;
             scaffolds.onN = scafN;
 
-        } else if (dy == 0 && nowState == 'playing') {
+        } else if (dy == 0 && nowState == 'playing') { //moving scaffolds
             iceMan.y = scaffolds.entity[scaffolds.onN][2] - scaffolds.height - iceMan.height;
-
         }
 
         //check drop hole
@@ -347,12 +359,7 @@ function checkMaxAcceleration() {
     } else return dy;
 }
 
-//無いと上に吹っ飛んでく
-function setJumpFlag() {
-    if (dy > scaffolds.downV) iceMan.jumpFlag = false; //droping
-}
-
-//引数は下から数えた足場の数:0~3
+//引数は下から数えた足場の数:scaffolds.visiableN
 // TOP or BOTTOM
 //Y軸は、足場にめり込んでる位置か判定
 function notBetweenHole(num, TorB) {
@@ -366,7 +373,7 @@ function notBetweenHole(num, TorB) {
     } else return false;
 }
 
-//引数は下から数えた足場の数:0~3
+//引数は下から数えた足場の数:scaffolds.visiableN
 //穴の上部のmargin
 function betweenHole(num) {
     const margin = 2;
@@ -392,7 +399,7 @@ function checkBoxCollition() {
 }
 
 function checkDead() {
-    if (iceMan.y > 290) {
+    if (iceMan.y > 320 - needle.height - iceMan.height) {
         lives = lives.slice(0, -1);
         dy = 2;
         iceMan.y = 30;
@@ -432,7 +439,6 @@ function gameTutorial() {
         checkScaffoldCollition();
 
         //この下は弄らない-----------------
-        //setJumpFlag();
         iceMan.x += dx;
         iceMan.y += checkMaxAcceleration();
     }
@@ -441,9 +447,9 @@ function gameTutorial() {
 function gamePlaying() {
 
     drawIceMan();
-    drawNeedles();
     updateScaffolds();
     drawScaffolds();
+    drawNeedles();
     drawLives();
     drawScore();
 
@@ -459,7 +465,6 @@ function gamePlaying() {
     checkDead();
 
     //この下は弄らない-----------------
-    //setJumpFlag();
     iceMan.x += dx;
     iceMan.y += checkMaxAcceleration();
 }
