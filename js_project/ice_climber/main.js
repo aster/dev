@@ -78,8 +78,6 @@ let iceMan = {
     'width': 20,
     'color': 'white',
     'stroke': "rgba(0, 0, 255, 0.5)",
-    //'x': canvas.width / 2 - 20 / 2, //20 -> iceMan.width
-    //'y': canvas.height - 150,
     'x': 70,
     'y': 260,
 
@@ -118,7 +116,8 @@ let scaffolds = {
     'entity': [], //  [btmX1,btmX2,btmY][btmX1,btmX2,btmY][]...
     'onFlag': false,
     'onN': 0,
-    'downV': 0.5,
+    'downV': 1,
+    //   'downV': 0.5,
     'visibleN': 5,
 
 }
@@ -144,7 +143,7 @@ const insideLeftWall = () => iceMan.x > 0;
 
 let startTime = 0; //tmp
 let score = 0;
-let lives = '♥♥♥';
+let lives = '♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥';
 
 function addScaffolds() {
     const min = scaffolds.holeWidth / 2;
@@ -173,11 +172,18 @@ function initScaffolds() {
 }
 
 function updateScaffolds() {
+    //acceralation 
+    if (50 < score && score < 100) {
+        scaffolds.downV = score / 50;
+    }
+
+    //down scaffolds
     for (let c = 0; c < scaffolds.visibleN; c++) {
         scaffolds.entity[c][2] += scaffolds.downV;
         scaffolds.y += scaffolds.downV;
     }
 
+    //update scaffolds index
     if (scaffolds.entity[0][2] - scaffolds.height > canvas.height) {
         scaffolds.entity.shift();
         scaffolds.onN--;
