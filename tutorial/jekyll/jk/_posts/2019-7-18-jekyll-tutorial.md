@@ -1,5 +1,5 @@
 ---
+layout: post 
 ---
-##Jekyll tutorial
-jekyll is a simple, blog aware, static site generator.
 
+jekyll is a simple, blog aware, static site generator.
