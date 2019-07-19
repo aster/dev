@@ -26,3 +26,5 @@ puts charlie.hello
 # >> My name is Charlie!
 {%endhighlight%}
 
+<!--coment out>
+
